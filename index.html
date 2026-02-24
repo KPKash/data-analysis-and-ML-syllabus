@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Analysis Syllabus</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap');
+
+  :root {
+    --bg: #0a0e17;
+    --surface: #111827;
+    --border: #1e2d45;
+    --accent-da: #00d4aa;
+    --accent-ml: #ff6b35;
+    --accent-both: #8b5cf6;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --card-bg: #0f1923;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Background grid */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: 
+      linear-gradient(rgba(0,212,170,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,170,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 60px 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  header {
+    margin-bottom: 60px;
+    border-left: 3px solid var(--accent-da);
+    padding-left: 24px;
+  }
+
+  header .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent-da);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    line-height: 1.1;
+    color: #fff;
+    margin-bottom: 16px;
+  }
+
+  h1 em {
+    color: var(--accent-da);
+    font-style: italic;
+  }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 15px;
+    font-weight: 300;
+    max-width: 500px;
+    line-height: 1.6;
+  }
+
+  /* Legend */
+  .legend {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    margin-bottom: 48px;
+    padding: 16px 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .dot.da { background: var(--accent-da); }
+  .dot.ml { background: var(--accent-ml); }
+  .dot.both { background: var(--accent-both); }
+
+  /* Phase */
+  .phase {
+    margin-bottom: 48px;
+    animation: fadeIn 0.5s ease forwards;
+    opacity: 0;
+  }
+
+  @keyframes fadeIn {
+    to { opacity: 1; }
+  }
+
+  .phase:nth-child(1) { animation-delay: 0.1s; }
+  .phase:nth-child(2) { animation-delay: 0.2s; }
+  .phase:nth-child(3) { animation-delay: 0.3s; }
+  .phase:nth-child(4) { animation-delay: 0.4s; }
+  .phase:nth-child(5) { animation-delay: 0.5s; }
+  .phase:nth-child(6) { animation-delay: 0.6s; }
+
+  .phase-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .phase-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    flex-shrink: 0;
+    width: 60px;
+  }
+
+  .phase-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .phase-duration {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 3px 10px;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+
+  .phase-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.4rem;
+    color: #fff;
+    margin-bottom: 6px;
+  }
+
+  .phase-desc {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 20px;
+    line-height: 1.6;
+  }
+
+  .topics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+  }
+
+  .topic-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    position: relative;
+    transition: border-color 0.2s, transform 0.2s;
+    overflow: hidden;
+  }
+
+  .topic-card:hover {
+    transform: translateY(-2px);
+  }
+
+  .topic-card.da { border-left: 3px solid var(--accent-da); }
+  .topic-card.da:hover { border-color: var(--accent-da); }
+  .topic-card.ml { border-left: 3px solid var(--accent-ml); }
+  .topic-card.ml:hover { border-color: var(--accent-ml); }
+  .topic-card.both { border-left: 3px solid var(--accent-both); }
+  .topic-card.both:hover { border-color: var(--accent-both); }
+
+  .topic-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .topic-detail {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .topic-tag {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    padding: 2px 7px;
+    border-radius: 100px;
+    text-transform: uppercase;
+  }
+
+  .topic-tag.da { background: rgba(0,212,170,0.1); color: var(--accent-da); }
+  .topic-tag.ml { background: rgba(255,107,53,0.1); color: var(--accent-ml); }
+  .topic-tag.both { background: rgba(139,92,246,0.1); color: var(--accent-both); }
+
+  /* Diversion Banner */
+  .diversion-banner {
+    margin: 48px 0;
+    padding: 28px 32px;
+    background: linear-gradient(135deg, rgba(255,107,53,0.08), rgba(139,92,246,0.08));
+    border: 1px solid rgba(255,107,53,0.3);
+    border-radius: 12px;
+    position: relative;
+    overflow: hidden;
+    animation: fadeIn 0.5s ease 0.35s forwards;
+    opacity: 0;
+  }
+
+  .diversion-banner::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent-ml), var(--accent-both));
+  }
+
+  .diversion-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent-ml);
+    margin-bottom: 10px;
+  }
+
+  .diversion-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.5rem;
+    color: #fff;
+    margin-bottom: 10px;
+  }
+
+  .diversion-body {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.7;
+    max-width: 640px;
+  }
+
+  .diversion-paths {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+    margin-top: 20px;
+  }
+
+  .path-btn {
+    padding: 14px 16px;
+    border-radius: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+  }
+
+  .path-btn:hover {
+    border-color: var(--accent-ml);
+    transform: translateY(-1px);
+  }
+
+  .path-btn .path-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .path-btn .path-desc {
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  /* Filter bar */
+  .filter-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+  }
+
+  .filter-btn {
+    padding: 7px 18px;
+    border-radius: 100px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .filter-btn:hover, .filter-btn.active {
+    background: var(--surface);
+    color: var(--text);
+    border-color: var(--accent-da);
+  }
+
+  .filter-btn.active.ml-filter { border-color: var(--accent-ml); color: var(--accent-ml); }
+  .filter-btn.active.both-filter { border-color: var(--accent-both); color: var(--accent-both); }
+
+  /* Progress bar */
+  .progress-bar {
+    display: flex;
+    height: 6px;
+    border-radius: 100px;
+    overflow: hidden;
+    margin-bottom: 48px;
+    gap: 2px;
+  }
+
+  .prog-seg {
+    border-radius: 100px;
+    transition: opacity 0.3s;
+    position: relative;
+  }
+
+  .prog-seg.da { background: var(--accent-da); }
+  .prog-seg.both { background: var(--accent-both); }
+  .prog-seg.ml { background: var(--accent-ml); }
+
+  footer {
+    margin-top: 80px;
+    padding-top: 32px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: gap;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="tag">// Learning Path · 2026
+    </div>
+    <h1>Data Analysis<br><em>Full Syllabus</em></h1>
+    <p class="subtitle">A structured roadmap from fundamentals to advanced analytics — with a natural pivot point into AI & Machine Learning.</p>
+  </header>
+
+  <!-- Progress Timeline -->
+  <div class="progress-bar">
+    <div class="prog-seg da" style="flex:2" title="Phase 1"></div>
+    <div class="prog-seg da" style="flex:2" title="Phase 2"></div>
+    <div class="prog-seg da" style="flex:2" title="Phase 3"></div>
+    <div class="prog-seg both" style="flex:2" title="Pivot Zone"></div>
+    <div class="prog-seg both" style="flex:2" title="Phase 4"></div>
+    <div class="prog-seg ml" style="flex:2" title="Phase 5 ML"></div>
+    <div class="prog-seg ml" style="flex:2" title="Phase 6 ML"></div>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="dot da"></div> Data Analysis path</div>
+    <div class="legend-item"><div class="dot ml"></div> AI/ML path</div>
+    <div class="legend-item"><div class="dot both"></div> Foundation for both paths</div>
+  </div>
+
+  <!-- Phase 1 -->
+  <div class="phase">
+    <div class="phase-header">
+      <span class="phase-num">PHASE 01</span>
+      <div class="phase-line"></div>
+      <span class="phase-duration">Weeks 1–4</span>
+    </div>
+    <div class="phase-title">Foundations of Data</div>
+    <p class="phase-desc">Build the bedrock — data types, spreadsheet mastery, and statistical thinking. No prior experience needed.</p>
+    <div class="topics-grid">
+      <div class="topic-card da">
+        <div class="topic-tag da">DA</div>
+        <div class="topic-name">Introduction to Data Analysis</div>
+        <div class="topic-detail">What is data? Types of data (structured, unstructured), data lifecycle, real-world use cases.</div>
+      </div>
+      <div class="topic-card da">
+        <div class="topic-tag da">DA</div>
+        <div class="topic-name">Excel / Google Sheets</div>
+        <div class="topic-detail">Formulas, pivot tables, VLOOKUP/XLOOKUP, data validation, charts & dashboards.</div>
+      </div>
+      <div class="topic-card da">
+        <div class="topic-tag da">DA</div>
+        <div class="topic-name">Descriptive Statistics</div>
+        <div class="topic-detail">Mean, median, mode, variance, standard deviation, distributions, skewness, kurtosis.</div>
+      </div>
+      <div class="topic-card da">
+        <div class="topic-tag da">DA</div>
+        <div class="topic-name">Data Collection & Quality</div>
+        <div class="topic-detail">Sources of data, scraping basics, missing values, outlier detection, data cleaning principles.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 2 -->
+  <div class="phase">
+    <div class="phase-header">
+      <span class="phase-num">PHASE 02</span>
+      <div class="phase-line"></div>
+      <span class="phase-duration">Weeks 5–9</span>
+    </div>
+    <div class="phase-title">SQL & Databases</div>
+    <p class="phase-desc">Query real databases. SQL is the most-used skill in data — master it deeply before moving on.</p>
+    <div class="topics-grid">
+      <div class="topic-card da">
+        <div class="topic-tag da">DA</div>
+        <div class="topic-name">SQL Basics</div>
+        <div class="topic-detail">SELECT, WHERE, GROUP BY, ORDER BY, HAVING, aliases, DISTINCT, LIMIT.</div>
+      </div>
+      <div class="topic-card da">
+        <div class="topic-tag da">DA</div>
+        <div class="topic-name">Joins & Subqueries</div>
+        <div class="topic-detail">INNER, LEFT, RIGHT, FULL joins, CTEs, nested queries, correlated subqueries.</div>
+      </div>
+      <div class="topic-card da">
+        <div class="topic-tag da">DA</div>
+        <div class="topic-name">Window Functions</div>
+        <div class="topic-detail">ROW_NUMBER, RANK, DENSE_RANK, LAG/LEAD, PARTITION BY, running totals.</div>
+      </div>
+      <div class="topic-card da">
+        <div class="topic-tag da">DA</div>
+        <div class="topic-name">Database Design Basics</div>
+        <div class="topic-detail">Relational vs NoSQL, ERDs, normalization (1NF–3NF), indexing fundamentals.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 3 -->
+  <div class="phase">
+    <div class="phase-header">
+      <span class="phase-num">PHASE 03</span>
+      <div class="phase-line"></div>
+      <span class="phase-duration">Weeks 10–15</span>
+    </div>
+    <div class="phase-title">Python for Data Analysis</div>
+    <p class="phase-desc">Python unlocks the full data ecosystem. Learn to manipulate, explore, and visualize data programmatically.</p>
+    <div class="topics-grid">
+      <div class="topic-card both">
+        <div class="topic-tag both">BOTH</div>
+        <div class="topic-name">Python Fundamentals</div>
+        <div class="topic-detail">Variables, loops, functions, list comprehensions, OOP basics, file I/O, error handling.</div>
+      </div>
+      <div class="topic-card both">
+        <div class="topic-tag both">BOTH</div>
+        <div class="topic-name">NumPy</div>
+        <div class="topic-detail">Arrays, vectorization, broadcasting, linear algebra ops — foundation for ML too.</div>
+      </div>
+      <div class="topic-card both">
+        <div class="topic-tag both">BOTH</div>
+        <div class="topic-name">Pandas</div>
+        <div class="topic-detail">DataFrames, merging, groupby, time series, apply/map, handling nulls, reshaping data.</div>
+      </div>
+      <div class="topic-card da">
+        <div class="topic-tag da">DA</div>
+        <div class="topic-name">Data Visualization</div>
+        <div class="topic-detail">Matplotlib, Seaborn, Plotly — histograms, scatter plots, heatmaps, interactive charts.</div>
+      </div>
+      <div class="topic-card da">
+        <div class="topic-tag da">DA</div>
+        <div class="topic-name">Exploratory Data Analysis (EDA)</div>
+        <div class="topic-detail">Profiling datasets, correlation analysis, distribution analysis, storytelling with data.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DIVERSION BANNER -->
+  <div class="diversion-banner">
+    <div class="diversion-label">⚡ Pivot Point — End of Month 4</div>
+    <div class="diversion-title">This is Where Your Path Branches</div>
+    <p class="diversion-body">
+      After completing Phase 3, you have a strong Python + data foundation. This is the ideal moment to decide: continue deep into <strong style="color: var(--accent-da)">Data Analysis</strong> (BI, dashboards, business intelligence, statistics) — or pivot into <strong style="color: var(--accent-ml)">AI/Machine Learning</strong> (model building, deep learning, MLOps). Many topics in Phase 4 serve both paths.
+    </p>
+    <div class="diversion-paths">
+      <div class="path-btn">
+        <div class="path-title" style="color:var(--accent-da)">→ Stay in Data Analysis</div>
+        <div class="path-desc">BI tools, advanced statistics, dashboards, storytelling</div>
+      </div>
+      <div class="path-btn">
+        <div class="path-title" style="color:var(--accent-ml)">→ Divert to AI/ML</div>
+        <div class="path-desc">Scikit-learn, deep learning, NLP, MLOps</div>
+      </div>
+      <div class="path-btn">
+        <div class="path-title" style="color:var(--accent-both)">→ Hybrid Track</div>
+        <div class="path-desc">Data analyst who builds and deploys ML models</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 4 -->
+  <div class="phase">
+    <div class="phase-header">
+      <span class="phase-num">PHASE 04</span>
+      <div class="phase-line"></div>
+      <span class="phase-duration">Weeks 16–21</span>
+    </div>
+    <div class="phase-title">Statistics & Probability — Core for Both Paths</div>
+    <p class="phase-desc">Regardless of which path you chose, this phase deepens your statistical reasoning — essential for analysis and model interpretation alike.</p>
+    <div class="topics-grid">
+      <div class="topic-card both">
+        <div class="topic-tag both">BOTH</div>
+        <div class="topic-name">Probability Theory</div>
+        <div class="topic-detail">Conditional probability, Bayes' theorem, probability distributions (normal, binomial, Poisson).</div>
+      </div>
+      <div class="topic-card both">
+        <div class="topic-tag both">BOTH</div>
+        <div class="topic-name">Inferential Statistics</div>
+        <div class="topic-detail">Hypothesis testing, p-values, t-tests, chi-square, ANOVA, confidence intervals.</div>
+      </div>
+      <div class="topic-card both">
+        <div class="topic-tag both">BOTH</div>
+        <div class="topic-name">Regression Analysis</div>
+        <div class="topic-detail">Linear regression, multiple regression, logistic regression, assumptions and diagnostics.</div>
+      </div>
+      <div class="topic-card both">
+        <div class="topic-tag both">BOTH</div>
+        <div class="topic-name">A/B Testing & Experimentation</div>
+        <div class="topic-detail">Designing experiments, statistical power, sample size, interpreting results correctly.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 5 — Data Analysis Track -->
+  <div class="phase">
+    <div class="phase-header">
+      <span class="phase-num">PHASE 05A</span>
+      <div class="phase-line"></div>
+      <span class="phase-duration">Weeks 22–28 · DA Track</span>
+    </div>
+    <div class="phase-title">Business Intelligence & Advanced Analytics</div>
+    <p class="phase-desc">For those on the Data Analyst track — master BI tools, dashboards, and reporting for business impact.</p>
+    <div class="topics-grid">
+      <div class="topic-card da">
+        <div class="topic-tag da">DA</div>
+        <div class="topic-name">Power BI / Tableau</div>
+        <div class="topic-detail">Data modeling, DAX/LOD calculations, interactive dashboards, published reports.</div>
+      </div>
+      <div class="topic-card da">
+        <div class="topic-tag da">DA</div>
+        <div class="topic-name">Advanced SQL & Analytics</div>
+        <div class="topic-detail">Funnel analysis, cohort analysis, RFM segmentation, time-series SQL queries.</div>
+      </div>
+      <div class="topic-card da">
+        <div class="topic-tag da">DA</div>
+        <div class="topic-name">Data Storytelling</div>
+        <div class="topic-detail">Narrative-driven dashboards, choosing the right chart, presenting to non-technical audiences.</div>
+      </div>
+      <div class="topic-card da">
+        <div class="topic-tag da">DA</div>
+        <div class="topic-name">KPIs & Metrics Frameworks</div>
+        <div class="topic-detail">AARRR, North Star metric, OKRs, building analyst playbooks, stakeholder alignment.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 5 — ML Track -->
+  <div class="phase">
+    <div class="phase-header">
+      <span class="phase-num">PHASE 05B</span>
+      <div class="phase-line"></div>
+      <span class="phase-duration">Weeks 22–28 · AI/ML Track</span>
+    </div>
+    <div class="phase-title">Machine Learning Foundations</div>
+    <p class="phase-desc">For those who pivoted to AI/ML — learn the core algorithms, model building workflow, and evaluation methodology.</p>
+    <div class="topics-grid">
+      <div class="topic-card ml">
+        <div class="topic-tag ml">ML</div>
+        <div class="topic-name">Scikit-learn Ecosystem</div>
+        <div class="topic-detail">Pipelines, preprocessing, train/test split, cross-validation, model persistence.</div>
+      </div>
+      <div class="topic-card ml">
+        <div class="topic-tag ml">ML</div>
+        <div class="topic-name">Supervised Learning</div>
+        <div class="topic-detail">Decision Trees, Random Forest, XGBoost, SVM, KNN — classification & regression.</div>
+      </div>
+      <div class="topic-card ml">
+        <div class="topic-tag ml">ML</div>
+        <div class="topic-name">Unsupervised Learning</div>
+        <div class="topic-detail">K-Means, DBSCAN, PCA, dimensionality reduction, anomaly detection.</div>
+      </div>
+      <div class="topic-card ml">
+        <div class="topic-tag ml">ML</div>
+        <div class="topic-name">Model Evaluation & Tuning</div>
+        <div class="topic-detail">Metrics (F1, ROC-AUC, RMSE), confusion matrix, GridSearchCV, learning curves.</div>
+      </div>
+      <div class="topic-card ml">
+        <div class="topic-tag ml">ML</div>
+        <div class="topic-name">Feature Engineering</div>
+        <div class="topic-detail">Encoding, scaling, feature selection, handling imbalanced datasets, SHAP values.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 6 -->
+  <div class="phase">
+    <div class="phase-header">
+      <span class="phase-num">PHASE 06</span>
+      <div class="phase-line"></div>
+      <span class="phase-duration">Weeks 29–36</span>
+    </div>
+    <div class="phase-title">Specialization & Production</div>
+    <p class="phase-desc">Advanced tracks, real-world deployment, and portfolio building. Choose your specialization.</p>
+    <div class="topics-grid">
+      <div class="topic-card da">
+        <div class="topic-tag da">DA</div>
+        <div class="topic-name">dbt & Modern Data Stack</div>
+        <div class="topic-detail">Data modeling in dbt, Snowflake/BigQuery, ELT pipelines, data cataloging.</div>
+      </div>
+      <div class="topic-card ml">
+        <div class="topic-tag ml">ML</div>
+        <div class="topic-name">Deep Learning with PyTorch/TF</div>
+        <div class="topic-detail">Neural networks, CNNs, RNNs, transformers, training loops, GPU usage.</div>
+      </div>
+      <div class="topic-card ml">
+        <div class="topic-tag ml">ML</div>
+        <div class="topic-name">NLP & LLMs</div>
+        <div class="topic-detail">Text preprocessing, embeddings, fine-tuning, RAG, prompt engineering, HuggingFace.</div>
+      </div>
+      <div class="topic-card ml">
+        <div class="topic-tag ml">ML</div>
+        <div class="topic-name">MLOps</div>
+        <div class="topic-detail">MLflow, model registries, Docker, FastAPI for serving, monitoring drift in production.</div>
+      </div>
+      <div class="topic-card both">
+        <div class="topic-tag both">BOTH</div>
+        <div class="topic-name">Cloud Platforms</div>
+        <div class="topic-detail">AWS/GCP/Azure essentials, S3, BigQuery, SageMaker, managed notebooks, IAM basics.</div>
+      </div>
+      <div class="topic-card both">
+        <div class="topic-tag both">BOTH</div>
+        <div class="topic-name">Capstone Projects</div>
+        <div class="topic-detail">End-to-end project from data ingestion to insight or deployed model — portfolio ready.</div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <span>Total Duration: ~6-9 months · 24-36  weeks</span>
+    <span>Data Analysis + AI/ML Syllabus · 2026 by Kartikey Pal, NexusUdaan</span>
+  </footer>
+
+</div>
+</body>
+</html>
